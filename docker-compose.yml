@@ -1,0 +1,41 @@
+version: "2"
+services:
+    client:
+        image: mhart/alpine-node:10
+        restart: always
+        ports:
+            - "4200:4200"
+        working_dir: /client/src/app
+        volumes:
+            - ./client:/client/src/app
+        entrypoint: ["npm", "start"]
+        links:
+            - server
+        networks:
+            - webappnetwork
+    server:
+        build: ./server
+        image: webapp-api
+        restart: always
+        ports:
+            - "3000:3000"
+        volumes:
+            - ./server:/server
+            - /server/node_modules
+        depends_on:
+            - mongodb
+        networks:
+            - webappnetwork
+    mongodb:
+        image: mongo
+        restart: always
+        container_name: mongodb
+        volumes:
+            - ./data-node:/data/db
+        ports:
+            - 27017:27017
+        networks:
+            - webappnetwork
+networks:
+    webappnetwork:
+        driver: bridge
